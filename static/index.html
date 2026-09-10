@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>دسته‌بند تصاویر</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="grain"></div>
+    <header class="top">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div>
+          <p class="eyebrow">سه دسته · آموزش · برچسب‌گذاری گروهی</p>
+          <h1>استودیوی دسته‌بندی عکس</h1>
+        </div>
+      </div>
+      <p class="status" id="status">در حال بارگذاری...</p>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab on" data-tab="train" type="button">آموزش مدل</button>
+      <button class="tab" data-tab="test" type="button">تست و برچسب</button>
+    </nav>
+
+    <main>
+      <section id="panel-train" class="panel on">
+        <div class="classes" id="classes"></div>
+        <section class="train-bar">
+          <div class="sliders">
+            <label>
+              دور آموزش
+              <input id="epochs" type="range" min="3" max="30" value="12" />
+              <b id="epochs-val">۱۲</b>
+            </label>
+            <label>
+              اندازه بچ
+              <input id="batch" type="range" min="2" max="16" value="8" />
+              <b id="batch-val">۸</b>
+            </label>
+          </div>
+          <button id="train-btn" class="primary" type="button">شروع آموزش</button>
+          <div class="progress-wrap">
+            <div class="bar"><i id="progress"></i></div>
+            <p id="train-log">برای هر دسته عکس گروهی بریز، بعد آموزش را بزن.</p>
+          </div>
+        </section>
+      </section>
+
+      <section id="panel-test" class="panel">
+        <div class="drop big" id="test-drop">
+          <strong>عکس‌های تست را همین‌جا رها کن</strong>
+          <p>چند فایل با هم، یا کل پوشه. بعد برچسب می‌خورند.</p>
+          <div class="row">
+            <label class="ghost">
+              انتخاب گروهی فایل
+              <input id="test-files" type="file" accept="image/*" multiple hidden />
+            </label>
+            <label class="ghost">
+              انتخاب پوشه
+              <input id="test-folder" type="file" webkitdirectory directory multiple hidden />
+            </label>
+            <button id="label-btn" class="primary" type="button">برچسب بزن</button>
+            <button id="export-btn" class="ghost-btn" type="button">خروجی CSV</button>
+            <button id="clear-test" class="ghost-btn" type="button">پاک کردن لیست</button>
+          </div>
+        </div>
+        <p class="summary" id="test-summary">۰ فایل تست</p>
+        <div class="results" id="results"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./dataset:/app/dataset
+      - ./models:/app/models
+    restart: unless-stopped

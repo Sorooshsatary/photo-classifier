@@ -1,0 +1,15 @@
+.git
+.gitignore
+.dockerignore
+__pycache__
+*.pyc
+.venv
+venv
+dataset
+models
+*.pt
+*.pth
+README.md
+docker-compose.yml
+run.bat
+app.py
