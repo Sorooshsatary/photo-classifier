@@ -1,6 +1,6 @@
-# استودیوی دسته‌بندی عکس
+# دسته‌بند گروهی عکس
 
-وب‌اپ برای آموزش یک مدل سه‌کلاسه روی عکس‌های خودت، بعد برچسب‌گذاری گروهی دادهٔ تست.
+وب‌اپ برای آموزش یک مدل سه‌کلاسه روی عکس‌های خودت و برچسب‌گذاری گروهی عکس‌های تست.
 
 مدل ازپیش‌آموزش‌دیده نیست. یک CNN کوچک PyTorch (`SmallCNN`) است که روی عکس‌هایی که وارد می‌کنی از صفر ترین می‌شود. ورودی `128×128` است و خروجی یکی از ۳ دسته.
 
@@ -32,8 +32,8 @@ docker compose down
 فقط با Dockerfile:
 
 ```bash
-docker build -t judg .
-docker run --rm -p 7860:7860 -v "%cd%/dataset:/app/dataset" -v "%cd%/models:/app/models" judg
+docker build -t batch-photo-classifier .
+docker run --rm -p 7860:7860 -v "%cd%/dataset:/app/dataset" -v "%cd%/models:/app/models" batch-photo-classifier
 ```
 
 روی لینوکس/مک به‌جای `%cd%` از `$(pwd)` استفاده کن.

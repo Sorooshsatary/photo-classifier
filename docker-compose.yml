@@ -6,4 +6,4 @@ services:
     volumes:
       - ./dataset:/app/dataset
       - ./models:/app/models
-    restart: unless-stopped
+    container_name: batch-photo-classifier

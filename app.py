@@ -217,7 +217,7 @@ class App(ctk.CTk):
 
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
-        self.title("دسته‌بند تصاویر — ۳ کلاس")
+        self.title("دسته‌بند گروهی عکس — ۳ کلاس")
         self.geometry("1180x760")
         self.minsize(980, 680)
 

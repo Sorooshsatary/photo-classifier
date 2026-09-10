@@ -36,7 +36,7 @@ train_state = {
     "metrics": None,
 }
 
-app = FastAPI(title="دسته‌بند تصاویر")
+app = FastAPI(title="دسته‌بند گروهی عکس")
 
 
 def class_dir(index: int) -> Path:
