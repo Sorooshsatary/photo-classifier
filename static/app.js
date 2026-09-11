@@ -5,6 +5,11 @@ const state = {
   data: null,
   testFiles: [],
   lastResults: [],
+  user: null,
+  questions: [],
+  search: "",
+  standings: [],
+  standingSearch: "",
 };
 
 function isImage(file) {
@@ -246,6 +251,9 @@ document.querySelectorAll(".tab").forEach((btn) => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b === btn));
     $("#panel-train").classList.toggle("on", btn.dataset.tab === "train");
     $("#panel-test").classList.toggle("on", btn.dataset.tab === "test");
+    $("#panel-status").classList.toggle("on", btn.dataset.tab === "status");
+    $("#panel-standings").classList.toggle("on", btn.dataset.tab === "standings");
+    $("#panel-save").classList.toggle("on", btn.dataset.tab === "save");
   });
 });
 
@@ -264,6 +272,202 @@ $("#clear-test").addEventListener("click", () => {
 });
 bindDrop($("#test-drop"), addTestFiles);
 
-refresh().catch((err) => {
+function showLoggedOut() {
+  state.user = null;
+  $("#login-box").hidden = false;
+  $("#save-box").hidden = true;
+}
+
+function showLoggedIn(username) {
+  state.user = username;
+  $("#login-box").hidden = true;
+  $("#save-box").hidden = false;
+  $("#who").textContent = username;
+}
+
+async function loadAlbum() {
+  if (!state.user) return;
+  const data = await api("/api/my/photos");
+  $("#album-summary").textContent = `${toFa(data.count)} عکس ذخیره‌شده`;
+  $("#album-grid").innerHTML = data.photos
+    .map(
+      (p) => `<article class="album-item">
+        <img src="${p.url}" alt="" />
+        <button type="button" data-del="${p.name}">حذف</button>
+      </article>`
+    )
+    .join("");
+  $("#album-grid").querySelectorAll("[data-del]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      await api(`/api/my/photos/delete/${encodeURIComponent(btn.dataset.del)}`, { method: "POST" });
+      await loadAlbum();
+    });
+  });
+}
+
+async function uploadAlbum(files) {
+  const images = [...files].filter(isImage);
+  if (!images.length) {
+    alert("عکس معتبری پیدا نشد.");
+    return;
+  }
+  const body = new FormData();
+  images.forEach((file) => body.append("files", file, file.name));
+  await api("/api/my/photos", { method: "POST", body });
+  await loadAlbum();
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+async function loadQuestions() {
+  try {
+    const data = await api("/api/questions");
+    if (data.error) {
+      $("#question-summary").textContent = data.error;
+      return;
+    }
+    state.questions = data.items || [];
+    const when = data.fetched_at ? new Date(data.fetched_at).toLocaleTimeString("fa-IR") : "";
+    $("#question-summary").textContent = state.questions.length
+      ? `${toFa(state.questions.length)} ردیف از شیت · به‌روز ${when}`
+      : "هنوز ردیفی در شیت خرید ثبت نشده.";
+    renderQuestions();
+  } catch (err) {
+    $("#question-summary").textContent = err.message;
+  }
+}
+
+function renderQuestions() {
+  const q = (state.search || "").trim().toLowerCase();
+  const items = state.questions.filter((item) => {
+    if (!q) return true;
+    return [item.team, item.question, item.price, item.score]
+      .map((v) => String(v || "").toLowerCase())
+      .some((v) => v.includes(q));
+  });
+  $("#question-table").innerHTML = `
+    <thead><tr>
+      <th>آیدی تیم</th><th>شماره سوال</th><th>قیمت</th><th>نمره داده‌شده</th>
+    </tr></thead>
+    <tbody>
+      ${items
+        .map(
+          (item) => `<tr>
+            <td>${escapeHtml(item.team)}</td>
+            <td>${escapeHtml(item.question)}</td>
+            <td>${escapeHtml(item.price)}</td>
+            <td>${escapeHtml(item.score)}</td>
+          </tr>`
+        )
+        .join("") || `<tr><td colspan="4">موردی با این جستجو پیدا نشد.</td></tr>`}
+    </tbody>`;
+}
+
+async function loadStandings() {
+  try {
+    const data = await api("/api/standings");
+    if (data.error) {
+      $("#standing-summary").textContent = data.error;
+      return;
+    }
+    state.standings = data.items || [];
+    const when = data.fetched_at ? new Date(data.fetched_at).toLocaleTimeString("fa-IR") : "";
+    $("#standing-summary").textContent = state.standings.length
+      ? `${toFa(state.standings.length)} تیم · به‌روز ${when}`
+      : "استندینگ خالی است.";
+    renderStandings();
+  } catch (err) {
+    $("#standing-summary").textContent = err.message;
+  }
+}
+
+function renderStandings() {
+  const q = (state.standingSearch || "").trim().toLowerCase();
+  const items = state.standings.filter((item) => {
+    if (!q) return true;
+    return [item.rank, item.team, item.total, item.day, item.stock]
+      .map((v) => String(v || "").toLowerCase())
+      .some((v) => v.includes(q));
+  });
+  $("#standing-table").innerHTML = `
+    <thead><tr>
+      <th>رتبه</th><th>آیدی تیم</th><th>امتیاز کل</th><th>امتیاز روز</th><th>قیمت سهام</th>
+    </tr></thead>
+    <tbody>
+      ${items
+        .map(
+          (item) => `<tr>
+            <td>${escapeHtml(item.rank)}</td>
+            <td>${escapeHtml(item.team)}</td>
+            <td>${escapeHtml(item.total)}</td>
+            <td>${escapeHtml(item.day)}</td>
+            <td>${escapeHtml(item.stock)}</td>
+          </tr>`
+        )
+        .join("") || `<tr><td colspan="5">موردی با این جستجو پیدا نشد.</td></tr>`}
+    </tbody>`;
+}
+
+async function submitLogin(username, password, errorEl) {
+  errorEl.hidden = true;
+  const body = new FormData();
+  body.append("username", username);
+  body.append("password", password);
+  try {
+    const me = await api("/api/login", { method: "POST", body });
+    showLoggedIn(me.username);
+    await loadAlbum();
+  } catch (ex) {
+    errorEl.hidden = false;
+    errorEl.textContent = ex.message;
+  }
+}
+
+async function checkSession() {
+  const me = await api("/api/me");
+  if (me.username) {
+    showLoggedIn(me.username);
+    await loadAlbum();
+  } else {
+    showLoggedOut();
+  }
+}
+
+$("#login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await submitLogin($("#login-user").value.trim(), $("#login-pass").value.trim(), $("#login-error"));
+});
+
+$("#logout-btn").addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST" });
+  showLoggedOut();
+});
+$("#album-files").addEventListener("change", (e) => uploadAlbum(e.target.files));
+$("#album-folder").addEventListener("change", (e) => uploadAlbum(e.target.files));
+$("#clear-album").addEventListener("click", async () => {
+  if (!confirm("عکس‌های ذخیره‌شده پاک شوند؟")) return;
+  await api("/api/my/photos/clear", { method: "POST" });
+  await loadAlbum();
+});
+bindDrop($("#album-drop"), uploadAlbum);
+$("#question-search").addEventListener("input", (e) => {
+  state.search = e.target.value;
+  renderQuestions();
+});
+$("#standing-search").addEventListener("input", (e) => {
+  state.standingSearch = e.target.value;
+  renderStandings();
+});
+setInterval(() => {
+  loadQuestions();
+  loadStandings();
+}, 4000);
+
+Promise.all([refresh(), checkSession(), loadQuestions(), loadStandings()]).catch((err) => {
   $("#status").textContent = err.message;
 });

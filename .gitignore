@@ -6,6 +6,9 @@ venv/
 .DS_Store
 dataset/
 models/
+userdata/
+sheet_config.json
+~$*.xlsx
 *.pt
 *.pth
 .idea/

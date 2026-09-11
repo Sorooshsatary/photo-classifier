@@ -180,6 +180,74 @@ h1 { margin: 4px 0 0; font-size: clamp(22px, 3.2vw, 32px); font-weight: 700; lin
 .prob .mini-bar { flex: 1; height: 6px; background: #2c241c; border-radius: 99px; overflow: hidden; }
 .prob .mini-bar span { display: block; height: 100%; background: var(--gold); }
 
+.userbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+#who { color: var(--gold); }
+.login-card {
+  width: min(420px, 100%);
+  background: linear-gradient(180deg, #241910, var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 28px 22px;
+  box-shadow: var(--shadow);
+}
+.login-card label { display: block; margin: 12px 0; color: var(--muted); }
+.login-card input {
+  width: 100%;
+  margin-top: 6px;
+  background: #120f0c;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  text-align: right;
+}
+.login-card .primary { width: 100%; margin-top: 8px; }
+.error { color: #efb4aa; }
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.album-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.album-item img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.album-item button {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  background: #2a211b;
+  color: #efb4aa;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.sheet-toolbar { margin-bottom: 12px; }
+.sheet-toolbar input {
+  width: 100%;
+  background: #120f0c;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font: inherit;
+}
+.sheet-table { width: 100%; border-collapse: collapse; min-width: 420px; }
+.sheet-table th, .sheet-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: right;
+}
+.sheet-table th { color: var(--gold); background: #241910; position: sticky; top: 0; }
+.sheet-table tr:hover td { background: rgba(232, 192, 122, 0.06); }
+
 @media (max-width: 1100px) {
   .classes { grid-template-columns: 1fr; }
 }

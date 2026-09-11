@@ -22,12 +22,35 @@
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab on" data-tab="train" type="button">آموزش مدل</button>
+      <button class="tab on" data-tab="status" type="button">وضعیت سوال</button>
+      <button class="tab" data-tab="standings" type="button">استندینگ</button>
+      <button class="tab" data-tab="train" type="button">آموزش مدل</button>
       <button class="tab" data-tab="test" type="button">تست و برچسب</button>
+      <button class="tab" data-tab="save" type="button">ورود و ذخیره</button>
     </nav>
 
     <main>
-      <section id="panel-train" class="panel on">
+      <section id="panel-status" class="panel on">
+        <div class="sheet-toolbar">
+            <input id="question-search" type="search" placeholder="جستجو: تیم، سوال، قیمت، نمره..." />
+        </div>
+        <p class="summary" id="question-summary">در حال خواندن شیت...</p>
+        <div class="sheet-wrap">
+          <table class="sheet-table" id="question-table"></table>
+        </div>
+      </section>
+
+      <section id="panel-standings" class="panel">
+        <div class="sheet-toolbar">
+          <input id="standing-search" type="search" placeholder="جستجو: رتبه، تیم، امتیاز..." />
+        </div>
+        <p class="summary" id="standing-summary">در حال خواندن استندینگ...</p>
+        <div class="sheet-wrap">
+          <table class="sheet-table" id="standing-table"></table>
+        </div>
+      </section>
+
+      <section id="panel-train" class="panel">
         <div class="classes" id="classes"></div>
         <section class="train-bar">
           <div class="sliders">
@@ -70,6 +93,48 @@
         </div>
         <p class="summary" id="test-summary">۰ فایل تست</p>
         <div class="results" id="results"></div>
+      </section>
+
+      <section id="panel-save" class="panel">
+        <div id="login-box" class="login-card">
+          <p class="eyebrow">ورود برای ذخیره عکس</p>
+          <form id="login-form">
+            <label>
+              نام کاربری
+              <input id="login-user" type="text" autocomplete="username" required />
+            </label>
+            <label>
+              رمز
+              <input id="login-pass" type="password" autocomplete="current-password" required />
+            </label>
+            <p class="error" id="login-error" hidden></p>
+            <button class="primary" type="submit">ورود</button>
+          </form>
+        </div>
+
+        <div id="save-box" hidden>
+          <div class="userbar">
+            <span id="who"></span>
+            <button id="logout-btn" class="ghost-btn" type="button">خروج</button>
+          </div>
+          <div class="drop big" id="album-drop">
+            <strong>عکس‌هایت را ذخیره کن</strong>
+            <p>روی دیسک می‌مانند و با بستن سایت پاک نمی‌شوند.</p>
+            <div class="row">
+              <label class="ghost">
+                انتخاب گروهی فایل
+                <input id="album-files" type="file" accept="image/*" multiple hidden />
+              </label>
+              <label class="ghost">
+                انتخاب پوشه
+                <input id="album-folder" type="file" webkitdirectory directory multiple hidden />
+              </label>
+              <button id="clear-album" class="ghost-btn" type="button">خالی کردن آلبوم</button>
+            </div>
+          </div>
+          <p class="summary" id="album-summary">۰ عکس</p>
+          <div class="album-grid" id="album-grid"></div>
+        </div>
       </section>
     </main>
 

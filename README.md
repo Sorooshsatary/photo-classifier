@@ -21,6 +21,8 @@ docker compose up --build
 
 http://127.0.0.1:7860
 
+صفحه اصلی همان آموزش و تست است و بدون ورود کار می‌کند. تب **ورود و ذخیره** برای حساب شخصی است؛ عکس‌ها در `userdata/<username>/photos` می‌مانند.
+
 عکس‌های آموزش در `dataset/` و وزن مدل در `models/` روی سیستم خودت ذخیره می‌شوند (volume).
 
 توقف:
@@ -33,7 +35,7 @@ docker compose down
 
 ```bash
 docker build -t batch-photo-classifier .
-docker run --rm -p 7860:7860 -v "%cd%/dataset:/app/dataset" -v "%cd%/models:/app/models" batch-photo-classifier
+docker run --rm -p 7860:7860 -v "%cd%/dataset:/app/dataset" -v "%cd%/models:/app/models" -v "%cd%/userdata:/app/userdata" batch-photo-classifier
 ```
 
 روی لینوکس/مک به‌جای `%cd%` از `$(pwd)` استفاده کن.
@@ -82,7 +84,8 @@ python -m uvicorn server:app --host 127.0.0.1 --port 7860
 | `server.py` | API و سرو کردن رابط وب |
 | `static/` | رابط گرافیکی مرورگر |
 | `model_engine.py` | معماری CNN، آموزش، پیش‌بینی |
-| `dataset/class_0..2` | عکس‌های هر دسته |
+| `userdata/<user>/photos` | آلبوم عکس هر فرد (پایدار روی دیسک) |
+| `dataset/class_0..2` | عکس‌های آموزش مدل |
 | `models/` | وزن ذخیره‌شدهٔ مدل |
 | `app.py` | رابط دسکتاپ قدیمی (اختیاری) |
 

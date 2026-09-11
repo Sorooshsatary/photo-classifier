@@ -6,4 +6,5 @@ services:
     volumes:
       - ./dataset:/app/dataset
       - ./models:/app/models
+      - ./userdata:/app/userdata
     container_name: batch-photo-classifier
