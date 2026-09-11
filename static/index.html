@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>دسته‌بند گروهی عکس</title>
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/style.css?v=2" />
   </head>
   <body>
     <div class="grain"></div>
@@ -24,6 +24,7 @@
     <nav class="tabs" role="tablist">
       <button class="tab on" data-tab="status" type="button">وضعیت سوال</button>
       <button class="tab" data-tab="standings" type="button">استندینگ</button>
+      <button class="tab" data-tab="seed" type="button">قرعه</button>
       <button class="tab" data-tab="train" type="button">آموزش مدل</button>
       <button class="tab" data-tab="test" type="button">تست و برچسب</button>
       <button class="tab" data-tab="save" type="button">ورود و ذخیره</button>
@@ -36,7 +37,7 @@
         </div>
         <p class="summary" id="question-summary">در حال خواندن شیت...</p>
         <div class="sheet-wrap">
-          <table class="sheet-table" id="question-table"></table>
+          <table class="sheet-table" id="question-table" dir="rtl"></table>
         </div>
       </section>
 
@@ -46,7 +47,31 @@
         </div>
         <p class="summary" id="standing-summary">در حال خواندن استندینگ...</p>
         <div class="sheet-wrap">
-          <table class="sheet-table" id="standing-table"></table>
+          <table class="sheet-table" id="standing-table" dir="rtl"></table>
+        </div>
+      </section>
+
+      <section id="panel-seed" class="panel">
+        <div class="seed-card">
+          <p class="eyebrow">گزینه سید</p>
+          <h2>۱، ۲ یا ۳ را بزن</h2>
+          <p class="summary">۱ از ۱ تا ۲۰ · ۲ از ۲۱ تا ۸۰ · ۳ از ۸۱ تا ۱۰۰</p>
+          <div class="seed-options">
+            <button type="button" class="seed-opt" data-seed="1">
+              ۱
+              <span>۱ تا ۲۰</span>
+            </button>
+            <button type="button" class="seed-opt" data-seed="2">
+              ۲
+              <span>۲۱ تا ۸۰</span>
+            </button>
+            <button type="button" class="seed-opt" data-seed="3">
+              ۳
+              <span>۸۱ تا ۱۰۰</span>
+            </button>
+          </div>
+          <p class="error" id="seed-error" hidden></p>
+          <p class="seed-result" id="seed-result">هنوز عددی تولید نشده.</p>
         </div>
       </section>
 
@@ -138,6 +163,6 @@
       </section>
     </main>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=2"></script>
   </body>
 </html>

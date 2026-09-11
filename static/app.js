@@ -249,12 +249,29 @@ function exportCsv() {
 document.querySelectorAll(".tab").forEach((btn) => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("on", b === btn));
-    $("#panel-train").classList.toggle("on", btn.dataset.tab === "train");
-    $("#panel-test").classList.toggle("on", btn.dataset.tab === "test");
-    $("#panel-status").classList.toggle("on", btn.dataset.tab === "status");
-    $("#panel-standings").classList.toggle("on", btn.dataset.tab === "standings");
-    $("#panel-save").classList.toggle("on", btn.dataset.tab === "save");
+    document.querySelectorAll(".panel").forEach((panel) => {
+      panel.classList.toggle("on", panel.id === `panel-${btn.dataset.tab}`);
+    });
   });
+});
+
+async function rollSeed(option) {
+  const err = $("#seed-error");
+  err.hidden = true;
+  const body = new FormData();
+  body.append("option", option);
+  try {
+    const data = await api("/api/seed", { method: "POST", body });
+    $("#seed-result").textContent =
+      `نتیجه: ${toFa(data.number)}  ·  گزینه ${toFa(data.option)}  ·  ${toFa(data.low)} تا ${toFa(data.high)}`;
+  } catch (ex) {
+    err.hidden = false;
+    err.textContent = ex.message;
+  }
+}
+
+document.querySelectorAll("[data-seed]").forEach((btn) => {
+  btn.addEventListener("click", () => rollSeed(btn.dataset.seed));
 });
 
 $("#epochs").addEventListener("input", (e) => ($("#epochs-val").textContent = toFa(e.target.value)));

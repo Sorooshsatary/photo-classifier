@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import os
+import random
 import shutil
 import threading
 import uuid
@@ -30,6 +31,12 @@ MODELS.mkdir(parents=True, exist_ok=True)
 USERDATA.mkdir(parents=True, exist_ok=True)
 for i in range(3):
     (DATASET / f"class_{i}").mkdir(parents=True, exist_ok=True)
+
+SEED_RANGES = {
+    "1": (1, 20),
+    "2": (21, 80),
+    "3": (81, 100),
+}
 
 classifier = ImageClassifier(MODELS)
 train_lock = threading.Lock()
@@ -189,6 +196,21 @@ def my_photo_file(name: str, username: str = Depends(require_user)):
     if not path.exists() or not path.is_file():
         raise HTTPException(404, "عکس پیدا نشد.")
     return FileResponse(path)
+
+
+@app.post("/api/seed")
+def roll_seed(option: str = Form(...)) -> dict:
+    key = option.strip()
+    bounds = SEED_RANGES.get(key)
+    if not bounds:
+        raise HTTPException(400, "فقط گزینه ۱، ۲ یا ۳ مجاز است.")
+    low, high = bounds
+    return {
+        "option": key,
+        "low": low,
+        "high": high,
+        "number": random.randint(low, high),
+    }
 
 
 @app.get("/api/questions")
