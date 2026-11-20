@@ -6,10 +6,10 @@ const state = {
   testFiles: [],
   lastResults: [],
   user: null,
-  questions: [],
-  search: "",
-  standings: [],
-  standingSearch: "",
+  comp: null,
+  compPhotos: [],
+  compGroups: [],
+  photoSearch: "",
 };
 
 function isImage(file) {
@@ -341,95 +341,6 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;");
 }
 
-async function loadQuestions() {
-  try {
-    const data = await api("/api/questions");
-    if (data.error) {
-      $("#question-summary").textContent = data.error;
-      return;
-    }
-    state.questions = data.items || [];
-    const when = data.fetched_at ? new Date(data.fetched_at).toLocaleTimeString("fa-IR") : "";
-    $("#question-summary").textContent = state.questions.length
-      ? `${toFa(state.questions.length)} ردیف از شیت · به‌روز ${when}`
-      : "هنوز ردیفی در شیت خرید ثبت نشده.";
-    renderQuestions();
-  } catch (err) {
-    $("#question-summary").textContent = err.message;
-  }
-}
-
-function renderQuestions() {
-  const q = (state.search || "").trim().toLowerCase();
-  const items = state.questions.filter((item) => {
-    if (!q) return true;
-    return [item.team, item.question, item.price, item.score]
-      .map((v) => String(v || "").toLowerCase())
-      .some((v) => v.includes(q));
-  });
-  $("#question-table").innerHTML = `
-    <thead><tr>
-      <th>آیدی تیم</th><th>شماره سوال</th><th>قیمت</th><th>نمره داده‌شده</th>
-    </tr></thead>
-    <tbody>
-      ${items
-        .map(
-          (item) => `<tr>
-            <td>${escapeHtml(item.team)}</td>
-            <td>${escapeHtml(item.question)}</td>
-            <td>${escapeHtml(item.price)}</td>
-            <td>${escapeHtml(item.score)}</td>
-          </tr>`
-        )
-        .join("") || `<tr><td colspan="4">موردی با این جستجو پیدا نشد.</td></tr>`}
-    </tbody>`;
-}
-
-async function loadStandings() {
-  try {
-    const data = await api("/api/standings");
-    if (data.error) {
-      $("#standing-summary").textContent = data.error;
-      return;
-    }
-    state.standings = data.items || [];
-    const when = data.fetched_at ? new Date(data.fetched_at).toLocaleTimeString("fa-IR") : "";
-    $("#standing-summary").textContent = state.standings.length
-      ? `${toFa(state.standings.length)} تیم · به‌روز ${when}`
-      : "استندینگ خالی است.";
-    renderStandings();
-  } catch (err) {
-    $("#standing-summary").textContent = err.message;
-  }
-}
-
-function renderStandings() {
-  const q = (state.standingSearch || "").trim().toLowerCase();
-  const items = state.standings.filter((item) => {
-    if (!q) return true;
-    return [item.rank, item.team, item.total, item.day, item.stock]
-      .map((v) => String(v || "").toLowerCase())
-      .some((v) => v.includes(q));
-  });
-  $("#standing-table").innerHTML = `
-    <thead><tr>
-      <th>رتبه</th><th>آیدی تیم</th><th>امتیاز کل</th><th>امتیاز روز</th><th>قیمت سهام</th>
-    </tr></thead>
-    <tbody>
-      ${items
-        .map(
-          (item) => `<tr>
-            <td>${escapeHtml(item.rank)}</td>
-            <td>${escapeHtml(item.team)}</td>
-            <td>${escapeHtml(item.total)}</td>
-            <td>${escapeHtml(item.day)}</td>
-            <td>${escapeHtml(item.stock)}</td>
-          </tr>`
-        )
-        .join("") || `<tr><td colspan="5">موردی با این جستجو پیدا نشد.</td></tr>`}
-    </tbody>`;
-}
-
 async function submitLogin(username, password, errorEl) {
   errorEl.hidden = true;
   const body = new FormData();
@@ -472,19 +383,140 @@ $("#clear-album").addEventListener("click", async () => {
   await loadAlbum();
 });
 bindDrop($("#album-drop"), uploadAlbum);
-$("#question-search").addEventListener("input", (e) => {
-  state.search = e.target.value;
-  renderQuestions();
-});
-$("#standing-search").addEventListener("input", (e) => {
-  state.standingSearch = e.target.value;
-  renderStandings();
-});
-setInterval(() => {
-  loadQuestions();
-  loadStandings();
-}, 4000);
-
-Promise.all([refresh(), checkSession(), loadQuestions(), loadStandings()]).catch((err) => {
+Promise.all([refresh(), checkSession(), loadCompetition()]).catch((err) => {
   $("#status").textContent = err.message;
+});
+
+// ---------------- مسابقه ----------------
+async function loadCompetition() {
+  const data = await api("/api/competition/state");
+  state.comp = data;
+  $("#comp-summary").textContent =
+    `${toFa(data.photos_total)} عکس در all-photo · ${toFa(data.photos_available)} آزاد · ${toFa(data.photos_sold)} فروخته‌شده · ${toFa(data.test_total)} عکس در پوشه test · ${toFa(data.groups_count)} گروه`;
+  $("#set-capital").value = data.settings.starting_capital;
+  $("#set-price").value = data.settings.default_photo_price;
+  $("#set-sellback").value = data.settings.sellback_rate;
+  const groups = await api("/api/competition/groups");
+  state.compGroups = groups.groups || [];
+  const opts = state.compGroups.map((g) => `<option value="${g.id}">${escapeHtml(g.id)}</option>`).join("");
+  $("#buy-group").innerHTML = opts;
+  $("#detail-group").innerHTML = opts;
+  $("#test-group").innerHTML = `<option value="">مدل سراسری</option>` + opts;
+  $("#buy-class").innerHTML = (data.classes || []).map((n, i) => `<option value="${i}">${escapeHtml(n)}</option>`).join("");
+  renderLeaderboard();
+  const photos = await api("/api/competition/photos");
+  state.compPhotos = photos.photos || [];
+  renderPhotos();
+  const ledger = await api("/api/competition/ledger?limit=100");
+  renderLedger(ledger.items || []);
+}
+
+function renderLeaderboard() {
+  $("#leader-table").innerHTML = `
+    <thead><tr><th>رتبه</th><th>گروه</th><th>موجودی نقد</th><th>عکس‌ها</th><th>ارزش دارایی</th><th>ارزش خالص</th><th>بهترین دقت تست</th></tr></thead>
+    <tbody>${state.compGroups.map((g) => `<tr>
+      <td>${toFa(g.rank)}</td><td>${escapeHtml(g.id)}</td>
+      <td>${toFa(Math.round(g.cash))}</td><td>${toFa(g.holdings_count)}</td>
+      <td>${toFa(Math.round(g.holdings_value))}</td><td>${toFa(Math.round(g.net_worth))}</td>
+      <td>${g.best_accuracy == null ? "—" : toFa(Math.round(g.best_accuracy * 100)) + "٪"}</td>
+    </tr>`).join("") || `<tr><td colspan="7">هنوز گروهی نیست.</td></tr>`}</tbody>`;
+}
+
+function renderPhotos() {
+  const q = (state.photoSearch || "").trim();
+  const items = state.compPhotos.filter((p) => !q || String(p.number).includes(q) || String(p.owner || "").includes(q));
+  $("#photo-table").innerHTML = `
+    <thead><tr><th>شماره</th><th>عکس</th><th>قیمت</th><th>وضعیت</th><th>مالک</th><th>دسته</th></tr></thead>
+    <tbody>${items.map((p) => `<tr>
+      <td>${toFa(p.number)}</td>
+      <td><img src="/api/competition/photos/${p.number}/image" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:10px" /></td>
+      <td>${toFa(Math.round(p.price))}</td>
+      <td>${p.status === "sold" ? "فروخته‌شده" : "آزاد"}</td>
+      <td>${escapeHtml(p.owner || "—")}</td><td>${toFa(p.class_index + 1)}</td>
+    </tr>`).join("") || `<tr><td colspan="6">عکسی در all-photo نیست.</td></tr>`}</tbody>`;
+}
+
+function renderLedger(items) {
+  $("#ledger-table").innerHTML = `
+    <thead><tr><th>گروه</th><th>شماره عکس</th><th>نوع</th><th>قیمت</th><th>موجودی بعد</th><th>تاریخ</th></tr></thead>
+    <tbody>${items.map((t) => `<tr>
+      <td>${escapeHtml(t.group_id)}</td><td>${toFa(t.photo_number)}</td>
+      <td>${t.type === "buy" ? "خرید" : "فروش"}</td><td>${toFa(Math.round(t.price))}</td>
+      <td>${toFa(Math.round(t.balance_after))}</td><td>${escapeHtml((t.created_at || "").slice(0, 19))}</td>
+    </tr>`).join("") || `<tr><td colspan="6">هنوز خریدی ثبت نشده.</td></tr>`}</tbody>`;
+}
+
+async function showGroupDetail() {
+  const id = $("#detail-group").value;
+  if (!id) return;
+  const g = await api(`/api/competition/groups/${encodeURIComponent(id)}`);
+  $("#detail-summary").textContent =
+    `${g.id} · موجودی ${toFa(Math.round(g.cash))} · ${toFa(g.holdings_count)} عکس · ارزش دارایی ${toFa(Math.round(g.holdings_value))} · ارزش خالص ${toFa(Math.round(g.net_worth))} · کل خرید ${toFa(Math.round(g.total_spent))}`;
+  $("#detail-table").innerHTML = `
+    <thead><tr><th>شماره عکس</th><th>قیمت خرید</th><th>دسته</th><th>فایل</th></tr></thead>
+    <tbody>${g.holdings.map((h) => `<tr>
+      <td>${toFa(h.number)}</td><td>${toFa(Math.round(h.bought_price || 0))}</td>
+      <td>${toFa(h.class_index + 1)}</td><td>${escapeHtml(h.filename)}</td>
+    </tr>`).join("") || `<tr><td colspan="4">این گروه هنوز عکسی ندارد.</td></tr>`}</tbody>`;
+}
+
+async function doBuyOrSell(kind) {
+  const err = $("#buy-error");
+  err.hidden = true;
+  $("#buy-msg").textContent = "";
+  const body = new FormData();
+  body.append("group_id", $("#buy-group").value);
+  body.append("numbers", $("#buy-numbers").value);
+  if (kind === "buy") {
+    body.append("class_index", $("#buy-class").value);
+    if ($("#buy-price").value) body.append("price", $("#buy-price").value);
+  }
+  try {
+    const data = await api(kind === "buy" ? "/api/competition/buy" : "/api/competition/sell", { method: "POST", body });
+    $("#buy-msg").textContent = kind === "buy"
+      ? `${toFa(data.bought.length)} عکس خریده شد · مجموع ${toFa(Math.round(data.total))} · موجودی بعد ${toFa(Math.round(data.cash_after))}`
+      : `${toFa(data.sold.length)} عکس فروخته شد · مجموع ${toFa(Math.round(data.total))} · موجودی بعد ${toFa(Math.round(data.cash_after))}`;
+    await loadCompetition();
+    await showGroupDetail();
+  } catch (ex) {
+    err.hidden = false;
+    err.textContent = ex.message;
+  }
+}
+
+$("#save-settings").addEventListener("click", async () => {
+  const body = new FormData();
+  body.append("starting_capital", $("#set-capital").value);
+  body.append("default_photo_price", $("#set-price").value);
+  body.append("sellback_rate", $("#set-sellback").value);
+  await api("/api/competition/settings", { method: "POST", body });
+  await loadCompetition();
+  alert("تنظیمات ذخیره شد.");
+});
+$("#rescan-btn").addEventListener("click", async () => { await api("/api/competition/rescan", { method: "POST" }); await loadCompetition(); });
+$("#buy-btn").addEventListener("click", () => doBuyOrSell("buy"));
+$("#sell-btn").addEventListener("click", () => doBuyOrSell("sell"));
+$("#detail-btn").addEventListener("click", showGroupDetail);
+$("#photo-search").addEventListener("input", (e) => { state.photoSearch = e.target.value; renderPhotos(); });
+$("#train-group-btn").addEventListener("click", async () => {
+  const id = $("#test-group").value;
+  if (!id) { alert("برای آموزش مدل گروه، اول یک گروه انتخاب کن."); return; }
+  const body = new FormData(); body.append("epochs", "12"); body.append("batch_size", "8");
+  try { await api(`/api/competition/train/${encodeURIComponent(id)}`, { method: "POST", body }); $("#comp-test-summary").textContent = "آموزش مدل گروه شروع شد؛ چند دقیقه صبر کن و بعد تست را بزن."; }
+  catch (ex) { alert(ex.message); }
+});
+$("#test-folder-btn").addEventListener("click", async () => {
+  const body = new FormData();
+  if ($("#test-group").value) body.append("group_id", $("#test-group").value);
+  try {
+    const data = await api("/api/competition/test-folder", { method: "POST", body });
+    const acc = data.accuracy == null ? "" : ` · دقت ${toFa(Math.round(data.accuracy * 100))}٪ روی ${toFa(data.scored)} عکس دارای برچسب واقعی`;
+    $("#comp-test-summary").textContent = `${data.model} · ${toFa(data.results.length)} عکس تست${acc}`;
+    $("#comp-test-results").innerHTML = data.results.map((item) => `<article class="result">
+      <img src="${item.thumb || ""}" alt="" />
+      <div class="meta"><b>${item.label} · ${toFa(Math.round(item.confidence * 100))}٪</b>
+      <div>عکس ${item.number == null ? "؟" : toFa(item.number)} · ${escapeHtml(item.file || "")}</div></div>
+    </article>`).join("");
+    await loadCompetition();
+  } catch (ex) { alert(ex.message); }
 });

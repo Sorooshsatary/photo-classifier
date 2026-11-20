@@ -17,10 +17,10 @@ RUN pip install --upgrade pip \
         --index-url https://download.pytorch.org/whl/cpu \
     && pip install -r requirements.txt
 
-COPY server.py model_engine.py accounts.py sheet_feed.py passwords.xlsx ./
+COPY server.py model_engine.py competition.py accounts.py passwords.xlsx ./
 COPY static ./static
 
-RUN mkdir -p dataset models userdata \
+RUN mkdir -p dataset dataset_groups models userdata data all-photo test \
     && mkdir -p dataset/class_0 dataset/class_1 dataset/class_2
 
 EXPOSE 7860

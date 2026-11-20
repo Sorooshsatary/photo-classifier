@@ -5,6 +5,10 @@ services:
       - "7860:7860"
     volumes:
       - ./dataset:/app/dataset
+      - ./dataset_groups:/app/dataset_groups
       - ./models:/app/models
       - ./userdata:/app/userdata
+      - ./data:/app/data
+      - ./all-photo:/app/all-photo
+      - ./test:/app/test
     container_name: batch-photo-classifier

@@ -5,8 +5,12 @@ venv/
 .env
 .DS_Store
 dataset/
+dataset_groups/
 models/
 userdata/
+data/
+all-photo/
+test/
 sheet_config.json
 ~$*.xlsx
 *.pt

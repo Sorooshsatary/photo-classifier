@@ -328,3 +328,13 @@ h1 { margin: 4px 0 0; font-size: clamp(22px, 3.2vw, 32px); font-weight: 700; lin
   .classes { grid-template-columns: 1fr; }
   .seed-options { grid-template-columns: 1fr; }
 }
+
+.comp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 8px; }
+.comp-label { display: block; margin: 12px 0; color: var(--muted); }
+.comp-label input, .comp-label select {
+  width: 100%; margin-top: 6px; background: #120f0c; border: 1px solid var(--line);
+  color: var(--ink); border-radius: 12px; padding: 10px 12px; font: inherit; text-align: right;
+}
+.comp-h { margin: 26px 0 10px; font-size: 18px; color: var(--gold); }
+#detail-group, #test-group, #buy-group, #buy-class { background: #120f0c; border: 1px solid var(--line); color: var(--ink); border-radius: 12px; padding: 10px 12px; font: inherit; }
+@media (max-width: 1100px) { .comp-grid { grid-template-columns: 1fr; } }

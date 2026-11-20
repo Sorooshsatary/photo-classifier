@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>دسته‌بند گروهی عکس</title>
-    <link rel="stylesheet" href="/style.css?v=2" />
+    <title>مسابقه خرید و فروش عکس</title>
+    <link rel="stylesheet" href="/style.css?v=3" />
   </head>
   <body>
     <div class="grain"></div>
@@ -14,16 +14,15 @@
           <span></span><span></span><span></span>
         </div>
         <div>
-          <p class="eyebrow">سه دسته · آموزش روی عکس تو · برچسب گروهی تست</p>
-          <h1>دسته‌بند گروهی عکس</h1>
+          <p class="eyebrow">مسابقه خرید و فروش عکس · دیتابیس داخلی · بدون گوگل‌شیت</p>
+          <h1>مسابقه خرید و فروش عکس</h1>
         </div>
       </div>
       <p class="status" id="status">در حال بارگذاری...</p>
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab on" data-tab="status" type="button">وضعیت سوال</button>
-      <button class="tab" data-tab="standings" type="button">استندینگ</button>
+      <button class="tab on" data-tab="comp" type="button">مسابقه</button>
       <button class="tab" data-tab="seed" type="button">قرعه</button>
       <button class="tab" data-tab="train" type="button">آموزش مدل</button>
       <button class="tab" data-tab="test" type="button">تست و برچسب</button>
@@ -31,24 +30,87 @@
     </nav>
 
     <main>
-      <section id="panel-status" class="panel on">
-        <div class="sheet-toolbar">
-            <input id="question-search" type="search" placeholder="جستجو: تیم، سوال، قیمت، نمره..." />
-        </div>
-        <p class="summary" id="question-summary">در حال خواندن شیت...</p>
-        <div class="sheet-wrap">
-          <table class="sheet-table" id="question-table" dir="rtl"></table>
-        </div>
-      </section>
+      <section id="panel-comp" class="panel on">
+        <p class="summary" id="comp-summary">در حال خواندن دیتابیس مسابقه...</p>
 
-      <section id="panel-standings" class="panel">
-        <div class="sheet-toolbar">
-          <input id="standing-search" type="search" placeholder="جستجو: رتبه، تیم، امتیاز..." />
+        <div class="comp-grid">
+          <div class="class-card" style="min-height:0">
+            <h2>تنظیمات مسابقه</h2>
+            <label class="comp-label">سرمایه شروع هر گروه
+              <input id="set-capital" type="number" min="0" step="1" />
+            </label>
+            <label class="comp-label">قیمت پیش‌فرض هر عکس
+              <input id="set-price" type="number" min="0" step="1" />
+            </label>
+            <label class="comp-label">نرخ فروش برگشتی (۰ تا ۱)
+              <input id="set-sellback" type="number" min="0" max="1" step="0.05" />
+            </label>
+            <div class="row">
+              <button id="save-settings" class="primary" type="button">ذخیره تنظیمات</button>
+              <button id="rescan-btn" class="ghost-btn" type="button">اسکن دوباره all-photo</button>
+              <a class="ghost-btn" href="/api/competition/export.xlsx" style="text-decoration:none">خروجی اکسل</a>
+            </div>
+            <p class="summary">عکس‌ها را با شماره داخل پوشه <b>all-photo</b> بگذار؛ عکس تست را داخل پوشه <b>test</b>. اگر عکس تست داخل زیرپوشه‌ای به اسم دسته باشد، دقت هم حساب می‌شود.</p>
+          </div>
+
+          <div class="class-card" style="min-height:0">
+            <h2>ثبت خرید / فروش</h2>
+            <label class="comp-label">گروه
+              <select id="buy-group"></select>
+            </label>
+            <label class="comp-label">شماره عکس‌ها (مثلاً 5, 12-15)
+              <input id="buy-numbers" type="text" placeholder="5, 12-15" dir="ltr" style="text-align:left" />
+            </label>
+            <label class="comp-label">دسته عکس‌های خریده‌شده (برای آموزش مدل گروه)
+              <select id="buy-class"></select>
+            </label>
+            <label class="comp-label">قیمت هر عکس (خالی = قیمت ثبت‌شده عکس)
+              <input id="buy-price" type="number" min="0" step="1" placeholder="" />
+            </label>
+            <p class="error" id="buy-error" hidden></p>
+            <p class="summary" id="buy-msg"></p>
+            <div class="row">
+              <button id="buy-btn" class="primary" type="button">ثبت خرید</button>
+              <button id="sell-btn" class="ghost-btn" type="button">فروش برگشتی به بانک</button>
+            </div>
+          </div>
         </div>
-        <p class="summary" id="standing-summary">در حال خواندن استندینگ...</p>
+
+        <h2 class="comp-h">جدول امتیاز گروه‌ها</h2>
         <div class="sheet-wrap">
-          <table class="sheet-table" id="standing-table" dir="rtl"></table>
+          <table class="sheet-table" id="leader-table" dir="rtl"></table>
         </div>
+
+        <h2 class="comp-h">دارایی یک گروه</h2>
+        <div class="row" style="justify-content:flex-start">
+          <select id="detail-group"></select>
+          <button id="detail-btn" class="ghost-btn" type="button">نمایش دارایی</button>
+        </div>
+        <p class="summary" id="detail-summary"></p>
+        <div class="sheet-wrap">
+          <table class="sheet-table" id="detail-table" dir="rtl"></table>
+        </div>
+        <h2 class="comp-h">دفتر خرید و فروش</h2>
+        <div class="sheet-wrap">
+          <table class="sheet-table" id="ledger-table" dir="rtl"></table>
+        </div>
+
+        <h2 class="comp-h">بازار عکس‌ها (all-photo)</h2>
+        <div class="sheet-toolbar">
+          <input id="photo-search" type="search" placeholder="جستجو: شماره عکس، مالک..." />
+        </div>
+        <div class="sheet-wrap">
+          <table class="sheet-table" id="photo-table" dir="rtl"></table>
+        </div>
+
+        <h2 class="comp-h">تست از پوشه test</h2>
+        <div class="row" style="justify-content:flex-start">
+          <select id="test-group"><option value="">مدل سراسری</option></select>
+          <button id="train-group-btn" class="ghost-btn" type="button">آموزش مدل گروه</button>
+          <button id="test-folder-btn" class="primary" type="button">تست پوشه test</button>
+        </div>
+        <p class="summary" id="comp-test-summary">مدل گروه فقط از عکس‌هایی که آن گروه خریده آموزش می‌بیند.</p>
+        <div class="results" id="comp-test-results"></div>
       </section>
 
       <section id="panel-seed" class="panel">
@@ -93,7 +155,7 @@
           <button id="train-btn" class="primary" type="button">شروع آموزش</button>
           <div class="progress-wrap">
             <div class="bar"><i id="progress"></i></div>
-            <p id="train-log">برای هر دسته عکس گروهی بریز، بعد آموزش را بزن.</p>
+            <p id="train-log">برای هر دسته عکس گروهی بریز، بعد آموزش را بزن. عکس‌های خریده‌شده گروه‌ها هم خودکار به دیتاست سراسری اضافه می‌شوند.</p>
           </div>
         </section>
       </section>
@@ -163,6 +225,6 @@
       </section>
     </main>
 
-    <script src="/app.js?v=2"></script>
+    <script src="/app.js?v=3"></script>
   </body>
 </html>
